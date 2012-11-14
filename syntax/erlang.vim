@@ -198,7 +198,7 @@ syn match erlangError "\v(\;|\,)[ \n\t]*(<end>&)" contained
 
 syn cluster erlangSimpleExpr add=erlangError
 
-syn match erlangComprehensions "\v\|\|" display contained
+syn match erlangComprehensions "\v\|\||\<\-|\<\=" display contained
 
 " Erlang list
 syn match erlangListDel '|' display contained
@@ -373,8 +373,6 @@ hi link erlangPPAttribute   Macro
 hi link erlangMacro         Macro
 hi link erlangMacroString   Macro
 
-" Include
-
 " Erlang Constant
 hi link erlangAtom          Constant
 hi link erlangNumber        Number
@@ -384,16 +382,19 @@ hi link erlangSpecialChar   SpecialChar
 
 " Delimiter
 hi link erlangClauseBegin    Statement
-hi link erlangSpecDelimiter  Statement
 hi link erlangListDel        Statement
-hi link erlangComprehensions Statement
 hi link erlangRecordDel      Statement
+hi link erlangBinary         Statement
 
 " Operator
 hi link erlangOperator      Operator
 
 " Erlang Type
 hi link erlangType          Type
+hi link erlangSpecDelimiter Typedef
+
+" Comprehensions
+hi link erlangComprehensions Repeat
 
 " Identifier
 hi link erlangIdentifier    Identifier
