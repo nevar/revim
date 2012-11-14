@@ -80,7 +80,7 @@ syn region erlangFileAttribute
 	\ contains=erlangAttribute,erlangNumber,erlangString
 syn region erlangCustomAttribute
 	\ start="^-compile("               end=")\."
-	\ contains=erlangAttribute,erlangTuple
+	\ contains=erlangAttribute,erlangTupleExpr
 syn region erlangMacrosDefine
 	\ start="^-define(" end=")\."
 	\ contains=erlangPPAttribute,@erlangExpr,erlangMacroString
@@ -202,28 +202,29 @@ syn match erlangComprehensions "\v\|\|" display contained
 
 " Erlang list
 syn match erlangListDel '|' display contained
-syn region erlangList
-	\ matchgroup=None
+syn region erlangListExpr
+	\ matchgroup=erlangList
 	\ start="\v\[" end="\v\]"
 	\ contained contains=@erlangExpr,erlangListDel,erlangComprehensions
 
-syn cluster erlangSimpleExpr add=erlangList
+syn cluster erlangSimpleExpr add=erlangListExpr
 
 " Binary
-syn region erlangBinary
+syn region erlangBinaryExpr
 	\ matchgroup=erlangBinary
 	\ start="\v\<\<" end="\v\>\>"
 	\ contained contains=@erlangExpr,erlangComprehensions
 
-syn cluster erlangSimpleExpr add=erlangBinary
+syn cluster erlangSimpleExpr add=erlangBinaryExpr
+
 
 " Erlang tuple
-syn region erlangTuple
-	\ matchgroup=None
+syn region erlangTupleExpr
+	\ matchgroup=erlangTuple
 	\ start="\v\{" end="\v\}"
 	\ contains=@erlangExpr
 
-syn cluster erlangSimpleExpr add=erlangTuple
+syn cluster erlangSimpleExpr add=erlangTupleExpr
 
 " Erlang BIF
 " List of BIF in erlangs:
