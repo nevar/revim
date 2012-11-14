@@ -191,9 +191,10 @@ syn cluster erlangSimpleExpr add=erlangOperator
 syn match erlangSpecDelimiter '::' display contained
 
 " Commom erlang error
+syn keyword erlangError end of after contained
 syn match erlangError "\v\[|\{|]|}" contained
-syn match erlangError "\v\,[ \n\t]*\," contained
-syn match erlangError "\v\,[ \n\t]*((]|}|\))&)" contained
+syn match erlangError "\v\,[ \n\t]*(\,|(\;&))" contained
+syn match erlangError "\v\,[ \n\t]*((]|}|\)|\>)&)" contained
 syn match erlangError "\v(\;|\,)[ \n\t]*(<end>&)" contained
 
 syn cluster erlangSimpleExpr add=erlangError
