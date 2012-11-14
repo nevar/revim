@@ -280,9 +280,8 @@ syn region erlangGuard
 	\ start=/when/ end="\v(\-\>&)"
 	\ contains=@erlangExpr,erlangGuardBIF contained
 
-
 " Block
-syn region erlangBlock
+syn region erlangBlockExpr
 	\ matchgroup=erlangBlock
 	\ start="\v<begin>" end="\v<end>"
 	\ contains=@erlangExpr contained
