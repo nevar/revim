@@ -2,7 +2,7 @@
 " Language:   Erlang
 " Maintainer: Yurin Slava <v.yurin@office.ngs.ru>
 " Maintainer: Seletskiy Stanislav <s.seletskiy@office.ngs.ru>
-" Version:    1.0.0
+" Version:    1.3.0
 " -----------------------------------------------------------------------------
 
 if exists("b:current_syntax")
@@ -191,7 +191,7 @@ syn cluster erlangSimpleExpr add=erlangOperator
 syn match erlangSpecDelimiter '::' display contained
 
 " Commom erlang error
-syn keyword erlangError end of after contained
+syn match erlangError "\v<end>|<of>|<after>" contained
 syn match erlangError "\v\[|\{|]|}" contained
 syn match erlangError "\v\,[ \n\t]*(\,|(\;&))" contained
 syn match erlangError "\v\,[ \n\t]*((]|}|\)|\>)&)" contained
@@ -286,7 +286,41 @@ syn region erlangBlockExpr
 	\ start="\v<begin>" end="\v<end>"
 	\ contains=@erlangExpr contained
 
-syn cluster erlangExpr add=erlangBlock
+syn cluster erlangExpr add=erlangBlockExpr
+
+" Receive
+syn region erlangAfterExpr
+	\ matchgroup=erlangAfter
+	\ start="\v<after>" end="\v(<end>&)"
+	\ contains=@erlangExpr contained
+
+syn region erlangReceiveBody
+	\ start="\v\-\>" end="\v\;" end="\v(<end>&)" end="\v(<after>&)"
+	\ contains=@erlangExpr,erlangClauseBegin contained
+
+syn region erlangReceiveBlock
+	\ matchgroup=erlangReceive
+	\ start="\v<receive>" end="\v<end>"
+	\ contains=@erlangExpr,erlangGuard,erlangReceiveBody,erlangAfterExpr
+	\ contained
+
+syn cluster erlangExpr add=erlangReceiveBlock
+
+" Try
+syn keyword erlangCatch catch contained
+
+syn region erlangTryBody
+	\ start="\v\-\>"
+	\ end="\v(<catch>&)" end="\v\;" end="\v(<end>&)" end="\v(<after>&)"
+	\ contains=@erlangExpr,erlangClauseBegin contained
+
+syn region erlangTryExpr
+	\ matchgroup=erlangTry
+	\ start="\v<try>" end="\v<end>"
+	\ contains=@erlangExpr,erlangGuard,erlangAfterExpr,erlangTryBody contained
+
+syn cluster erlangExpr add=erlangTryExpr
+syn cluster erlangExpr add=erlangCatch
 
 " Case
 " Add & for end of region for erlangCaseClause can start his region
@@ -301,7 +335,7 @@ syn cluster erlangExpr add=erlangCaseBlock
 syn region erlangCaseClause
 	\ matchgroup = erlangCase
 	\ start="\v<of>" end="\v<end>"
-	\ contains=@erlangExpr,erlangGuard,erlangLambdaFunBody contained
+	\ contains=@erlangSimpleExpr,erlangGuard,erlangLambdaFunBody contained
 
 " If
 syn region erlangIfBlock
@@ -312,20 +346,6 @@ syn region erlangIfBlock
 syn cluster erlangExpr add=erlangIfBlock
 
 syn match erlangClauseBegin '->' display contained
-
-" Receive
-syn keyword erlangAfter after contained
-
-syn region erlangReceiveBody
-	\ start="\v\-\>" end="\v\;" end="\v(<end>&)" end="\v(<after>&)"
-	\ contains=@erlangExpr,erlangClauseBegin contained
-
-syn region erlangReceiveBlock
-	\ matchgroup=erlangReceive
-	\ start="\v<receive>" end="\v<end>"
-	\ contains=@erlangExpr,erlangGuard,erlangReceiveBody,erlangAfter contained
-
-syn cluster erlangExpr add=erlangReceiveBlock
 
 " Function
 syn region erlangFun
@@ -385,6 +405,10 @@ hi link erlangClauseBegin    Statement
 hi link erlangListDel        Statement
 hi link erlangRecordDel      Statement
 hi link erlangBinary         Statement
+
+" Try catch
+hi link erlangTry        Exception
+hi link erlangCatch      Exception
 
 " Operator
 hi link erlangOperator      Operator
