@@ -150,11 +150,11 @@ syn match erlangFunctionName
 syn keyword erlangFunKeyword fun contained
 
 syn match erlangFunReference
-	\ "\vfun (\l[a-zA-Z0-9@_]*\:)?\l[a-zA-Z0-9@_]*/[0-9]+"
-	\ display contains=erlangNumber,erlangFunKeyword,erlangAtom contained
+	\ "\vfun (\w[a-zA-Z0-9@_]*\:)?\w[a-zA-Z0-9@_]*/[0-9]+"
+	\ display contains=erlangNumber,erlangFunKeyword,erlangAtom,erlangIdentifier contained
 syn match erlangFunReference
-	\ "\vfun (\l[a-zA-Z0-9@_]*\:)?\'([^\\']*(\\\'[^\\']*)*)\'/[0-9]+"
-	\ display contains=erlangNumber,erlangAtom contained
+	\ "\vfun (\w[a-zA-Z0-9@_]*\:)?\'([^\\']*(\\\'[^\\']*)*)\'/[0-9]+"
+	\ display contains=erlangNumber,erlangAtom,erlangFunKeyword,erlangIdentifier contained
 
 syn cluster erlangExpr add=erlangFunReference
 
