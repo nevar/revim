@@ -28,6 +28,12 @@
 
 -spec test(BBB :: module(), Aaaa :: string(), Aaaa :: string()) -> string().
 
+-spec nth(N, List) -> Elem when
+      N :: pos_integer(),
+      List :: [T, ...],
+      Elem :: T,
+      T :: term().
+
 -record(test, { test1 = 0 :: integer(),
                 %dsafdsafdam
                 test2 :: [term()]}).
@@ -49,6 +55,29 @@ two_clause(B) ->
 	B.
 
 guard(A) when size(A) > 10; is_list(A) ->
+	fun1(),
+	m:fun1(),
+
+	Fun(),
+	m:Fun(),
+	M:fun1(),
+	M:fun1(),
+
+	fun fun1/0,
+	fun m:fun1/0,
+	fun m:Fun/0,
+	fun M:fun1/0,
+	fun M:fun1/0,
+
+	fun(A) ->
+		ok
+	; (B) when size(B) > 5 ->
+		ok
+	end,
+
+	spawn(module, fun1, Args),
+	spawn_link(module, fun1, Args),
+
 	ok.
 
 list() ->
