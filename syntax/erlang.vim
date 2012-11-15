@@ -276,7 +276,7 @@ execute 'syn match erlangGuardBIF "\v((erlang\:)@<=|:@<!)<('.
 	\ join(s:guard, '|') . ')>(\(&)" display contained'
 
 " Function Guard
-syn region erlangGuard
+syn region erlangGuardExpr
 	\ matchgroup=erlangGuard
 	\ start=/when/ end="\v(\-\>&)"
 	\ contains=@erlangExpr,erlangGuardBIF contained
@@ -302,7 +302,7 @@ syn region erlangReceiveBody
 syn region erlangReceiveBlock
 	\ matchgroup=erlangReceive
 	\ start="\v<receive>" end="\v<end>"
-	\ contains=@erlangExpr,erlangGuard,erlangReceiveBody,erlangAfterExpr
+	\ contains=@erlangExpr,erlangGuardExpr,erlangReceiveBody,erlangAfterExpr
 	\ contained
 
 syn cluster erlangExpr add=erlangReceiveBlock
@@ -318,7 +318,7 @@ syn region erlangTryBody
 syn region erlangTryExpr
 	\ matchgroup=erlangTry
 	\ start="\v<try>" end="\v<end>"
-	\ contains=@erlangExpr,erlangGuard,erlangAfterExpr,erlangTryBody contained
+	\ contains=@erlangExpr,erlangGuardExpr,erlangAfterExpr,erlangTryBody contained
 
 syn cluster erlangExpr add=erlangTryExpr
 syn cluster erlangExpr add=erlangCatch
@@ -336,7 +336,7 @@ syn cluster erlangExpr add=erlangCaseBlock
 syn region erlangCaseClause
 	\ matchgroup = erlangCase
 	\ start="\v<of>" end="\v<end>"
-	\ contains=@erlangSimpleExpr,erlangGuard,erlangLambdaFunBody contained
+	\ contains=@erlangSimpleExpr,erlangGuardExpr,erlangLambdaFunBody contained
 
 " If
 syn region erlangIfBlock
@@ -353,7 +353,7 @@ syn region erlangFun
 	\ matchgroup=erlangFunHead
 	\ start="\v^\l[0-9A-Za-z_-]*(\(&)"
 	\ start="\v^\'[^\\']*(\\\'[^\\']*)*\'(\(&)" end="\v\-\>&"
-	\ nextgroup=erlangFunBody contains=erlangFunArg,erlangGuard
+	\ nextgroup=erlangFunBody contains=erlangFunArg,erlangGuardExpr
 
 syn region erlangFunArg
 	\ start="\v\(" end="\v\)" contains=@erlangExpr contained
@@ -366,10 +366,10 @@ syn region erlangFunBody
 syn region erlangLambdaFun
 	\ matchgroup=erlangFunKeyword
 	\ start="\v<fun>(\(&)" end="\v<end>"
-	\ contains=erlangFunArg,erlangGuard,erlangLambdaFunBody contained
+	\ contains=erlangFunArg,erlangGuardExpr,erlangLambdaFunBody contained
 
 syn region erlangLambdaFunBody
-	\ start="\v\-\>" end="\v\;$" end="\v<end>&"
+	\ start="\v\-\>" end="\v\;" end="\v<end>&"
 	\ contains=@erlangExpr,erlangClauseBegin contained
 
 syn cluster erlangExpr add=erlangLambdaFun
