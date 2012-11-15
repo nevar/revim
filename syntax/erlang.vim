@@ -168,6 +168,7 @@ let s:types = ["any", "none", "pid", "port", "reference", "float", "atom",
 
 execute 'syn match erlangType "\v:@<!<(' . join(s:types, "|") .
 	\ ')(\(&)" display contained'
+syn match erlangType "\.\.\." display contained
 
 " Records
 syn match erlangRecordDel '#\|\.' display contained
