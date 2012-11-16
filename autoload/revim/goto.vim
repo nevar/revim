@@ -83,11 +83,11 @@ function! s:Open(type, module, function)
 	endif
 endfunction
 
-function! revim#goto#Define(localdefine, globaldefine)
+function! revim#goto#Define(globaldefine)
 	" regexp for erlang atom
 	let l:atom = '\l[a-zA-Z0-9_@]*'
 
-	if a:localdefine > 2 || a:globaldefine > 2
+	if a:globaldefine > 2
 		return
 	endif
 
@@ -102,14 +102,14 @@ function! revim#goto#Define(localdefine, globaldefine)
 		let [l:module, l:function] = split(l:MF, ":")
 		if l:module == expand('%:t:r')
 			" Same module function call
-			let l:type = a:localdefine
+			let l:type = 0
 		else
 			" To other module function call
 			let l:type = a:globaldefine
 		endif
 	elseif match(l:MF, '\v^' . l:atom . '$') == 0
 		" local function call
-		let l:type = a:localdefine
+		let l:type = 0
 		let function = l:MF
 	end
 	call s:Open(l:type, l:module, l:function)
