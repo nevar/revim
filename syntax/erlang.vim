@@ -42,45 +42,53 @@ syn match erlangEdocTag "\v^\%{2,3}\s*\@\w+"
 	\ display contained
 
 " Attribute
-syn keyword erlangAttribute
-	\ behavior module export import  contained import_type compile record file
-	\ behaviour export_type spec type opaque
-	\ contained
-
 syn keyword erlangPPAttribute
 	\ define undef ifdef ifndef else endif include include_lib
 	\ contained
 
 syn region erlangCustomAttribute
-	\ start="\v^-\l[a-zA-Z0-9@_]*"ms=s+1 end="\v\."
+	\ matchgroup=erlangAttribute
+	\ start="\v^-\l[a-zA-Z0-9@_]*"hs=s+1 end="\v\."he=e-1
 	\ contains=@erlangSimpleExpr
 syn region erlangBehaviorAttribute
-	\ start="\v^-behaviou?r\("           end="\v\)\."
-	\ contains=erlangAttribute,erlangAtom
+	\ matchgroup=erlangAttribute
+	\ start="\v^-behaviou?r\("hs=s+1 end="\v\."he=e-1
+	\ contains=erlangAtom
 syn region erlangModuleAttribute
-	\ start="\v^-module\("                end="\v\)\."
-	\ contains=erlangAttribute,erlangIdentifier,erlangAtom
+	\ matchgroup=erlangAttribute
+	\ start="\v^-module"hs=s+1 end="\v\."he=e-1
+	\ contains=erlangIdentifier,erlangAtom
 syn region erlangExportAttribute
-	\ start="\v^-export(_type)?\(\["   end="\v\]\)\."
-	\ contains=erlangAttribute,erlangFunctionName
+	\ matchgroup=erlangAttribute
+	\ start="\v^-export(_type)?"hs=s+1 end="\v\."he=e-1
+	\ contains=erlangFunctionName
 syn region erlangImportAttribute
-	\ start="\v^-import(_type)?\("     end="\v\)\."
-	\ contains=erlangAttribute,erlangFunctionName,erlangAtom
+	\ matchgroup=erlangAttribute
+	\ start="\v^-import(_type)?"hs=s+1 end="\v\."he=e-1
+	\ contains=erlangFunctionName,erlangAtom
+" If remove matchgroup before end, than first match end and then contains
 syn region erlangSpecAttribute
-	\ start="^-spec"                   end="\."
-	\ contains=erlangAttribute,erlangType,erlangAtom,erlangIdentifier,erlangSpecDelimiter,erlangClauseBegin
+	\ matchgroup=erlangAttribute
+	\ start="^-spec"hs=s+1
+	\ matchgroup=NONE
+	\ end="\."
+	\ extend contains=erlangType,erlangAtom,erlangIdentifier,erlangSpecDelimiter,erlangClauseBegin
 syn region erlangRecordAttribute
-	\ start="^-record("                end="\v\)\."
-	\ contains=erlangAttribute,erlangSpecDelimiter,erlangAtom,erlangString,erlangNumber,erlangType,erlangInComment,erlangOperator
+	\ matchgroup=erlangAttribute
+	\ start="\v^-record"hs=s+1 end="\v\."he=e-1
+	\ contains=erlangSpecDelimiter,erlangAtom,erlangString,erlangNumber,erlangType,erlangInComment,erlangOperator
 syn region erlangTypeAttribute
-	\ start="\v^-(type|opaque)"        end="\v\."
-	\ contains=erlangAttribute,erlangType,erlangAtom,erlangIdentifier,erlangSpecDelimiter,erlangNumber,erlangInComment,erlangOperator
+	\ matchgroup = erlangAttribute
+	\ start="\v^-(type|opaque)"hs=s+1  end="\v\."he=e-1
+	\ contains=erlangType,erlangAtom,erlangIdentifier,erlangSpecDelimiter,erlangNumber,erlangInComment,erlangOperator
 syn region erlangFileAttribute
-	\ start="^-file("                  end=")\."
-	\ contains=erlangAttribute,erlangNumber,erlangString
+	\ matchgroup = erlangAttribute
+	\ start="^-file"hs=s+1 end="\."he=e-1
+	\ contains=erlangNumber,erlangString
 syn region erlangCustomAttribute
-	\ start="^-compile("               end=")\."
-	\ contains=erlangAttribute,erlangTupleExpr
+	\ matchgroup = erlangAttribute
+	\ start="^-compile"hs=s+1 end="\."he=e-1
+	\ contains=erlangTupleExpr
 syn region erlangMacrosDefine
 	\ start="^-define(" end=")\."
 	\ contains=erlangPPAttribute,@erlangExpr,erlangMacroString
