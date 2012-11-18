@@ -3,17 +3,28 @@ if !exists("g:erl_top")
 		\ system("escript " . expand('<sfile>:p:h:h:h') . '/scripts/erlang_dir')
 endif
 
-function! s:Find(function)
-	" reset error message
-	let v:errmsg = ""
-	execute "silent! keepjumps normal! /^\\V" . a:function . "(\<CR>"
+function! s:Find(MFA)
+	" with arity
+	let l:witharity = '^\V' . a:MFA.function . '(' .
+		\ join(repeat(['\.\*'], a:MFA['arity']), ',') . ')'
+	" without arity
+	let l:withoutarity = '^\V' . a:MFA.function . '('
+
+	for pattern in [l:witharity, l:withoutarity]
+		" reset error message
+		let v:errmsg = ""
+		execute 'silent! keepjumps normal! /' . pattern . "\<CR>"
+		if v:errmsg == ""
+			break
+		end
+	endfor
 	if v:errmsg != ""
-		execute "normal! \<c-o>"
+		execute "silent normal! \<c-o>"
 	endif
 	let @/ = ""
 endfunction
 
-function! s:Create(type, module, function)
+function! s:Create(type, MFA)
 	" reset error message
 	let v:errmsg = ""
 	let l:old_path = &path
@@ -21,17 +32,15 @@ function! s:Create(type, module, function)
 		\ ",**/src/**," .
 		\ "," . g:erl_top . "*/src/**"
 
-	let l:current = expand('%:t:r')
-
 	if a:type == 0
 		" open in same window
-		execute "silent! find " . a:module . ".erl"
+		execute "silent! find " . a:MFA.module . ".erl"
 	elseif a:type == 1
 		" open in new window
-		execute "silent! " . g:split . " sfind " . a:module . ".erl"
+		execute "silent! " . g:split . " sfind " . a:MFA.module . ".erl"
 	elseif a:type == 2
 		" open in new tab
-		execute "silent! tabfind " . a:module . ".erl"
+		execute "silent! tabfind " . a:MFA.module . ".erl"
 	end
 	let &path = l:old_path
 
@@ -41,30 +50,31 @@ function! s:Create(type, module, function)
 
 	" we open new file
 	keepjumps normal! gg
-
-	call s:Find(a:function)
+	call s:Find(a:MFA)
 
 	if v:errmsg != ""
-		" Return where user run goto
+		" return where user run goto
 		if a:type == 1
 			bdelete
 		elseif a:type == 2
 			tabclose
 			tabprevious
-		else
-			execute "normal! \<c-o>"
 		end
 	endif
 endfunction
 
-function! s:Open(type, module, function)
-	let l:module = '\(^\|/\)' . a:module . '\.erl'
-	" Try to find existing buffer
+function! s:Open(type, MFA)
+	let l:module = '\(^\|/\)' . a:MFA.module . '\.erl'
+	" try to find existing buffer
 	let l:bufnum = bufnr(l:module)
 	if l:bufnum != -1
+		" foreach tab
 		for i in range(tabpagenr('$'))
+			" try find buffer
 			let l:buflist = tabpagebuflist(i + 1)
 			if index(l:buflist, l:bufnum) >= 0
+				" Buffer exists on that tab
+				" Goto that tab
 				execute "tabnext " . (i + 1)
 				break
 			endif
@@ -72,45 +82,116 @@ function! s:Open(type, module, function)
 
 		let l:window = bufwinnr(l:module)
 		if l:window != -1
+			" we found buffer goto that buffer
 			execute l:window . "wincmd w"
 			normal! gg
-			call s:Find(a:function)
+			call s:Find(a:MFA)
 		else
-			call s:Create(a:type, a:module, a:function)
+			call s:Create(a:type, a:MFA)
 		endif
 	else
-		call s:Create(a:type, a:module, a:function)
+		call s:Create(a:type, a:MFA)
 	endif
 endfunction
 
-function! revim#goto#Define(globaldefine)
-	" regexp for erlang atom
-	let l:atom = '\l[a-zA-Z0-9_@]*'
+function s:CountArgs()
+	let l:line = strpart(getline('.'), col('.'))
+	let l:inside = 0
+	let l:i = 0
+	let l:arity = 1
+	let l:lnum = line('.')
+	while 1
+		if l:i > strlen(l:line)
+			" Get next line
+			let l:lnum += 1
+			let l:line = getline(nextnonblank(l:lnum))
+			let l:i = 0
+		elseif l:inside == 0 && l:line[l:i] == ')'
+			" found close of function call
+			break
+		elseif l:inside == 0 && l:line[l:i] == ','
+			" function argument
+			let l:arity += 1
+		elseif l:inside > 0 && l:line[l:i] == ')'
+			" found close of function call in argument
+			let l:inside -= 1
+		elseif l:line[l:i] == '('
+			" start of function call in argument
+			let l:inside += 1
+		elseif l:line[l:i : l:i + 4] ==# 'fun('
+			" lambda function begin
+			let l:inside += 1
+		elseif l:line[l:i : l:i + 3] ==# 'end'
+			" lambda function end
+			let l:inside -= 1
+		endif
+		let l:i += 1
+	endwhile
 
-	if a:globaldefine > 2
-		return
-	endif
+	return l:arity
+endfunction
+
+function! s:MFA()
+	let l:MFA = {}
+	let l:column = col('.')
+	let l:position = getpos('.')
 
 	" get fun name with module
 	setlocal iskeyword+=:
 	let l:MF = expand('<cword>')
+	normal! w
 	setlocal iskeyword-=:
 
-	let l:module = expand('%:t:r')
+	let l:line = strpart(getline('.'), col('.') - 1)
+	" count function arguments
+	if l:line =~ '\v^\(\)'
+		let l:MFA.arity = 0
+	elseif l:line =~ '\v^\('
+		let l:MFA.arity = s:CountArgs()
+	elseif l:line =~ '\v^\/'
+		let l:MFA.arity = strpart(l:line, 1) + 0
+	else
+		call setpos('.', l:position)
+		return {}
+	endif
+
+	call setpos('.', l:position)
+
+	" regexp for erlang atom
+	let l:atom = '\l[a-zA-Z0-9_@]*'
 
 	if match(l:MF, '\v^' . l:atom . '\:' . l:atom . '$') == 0
 		let [l:module, l:function] = split(l:MF, ":")
-		if l:module == expand('%:t:r')
-			" Same module function call
-			let l:type = 0
-		else
+		let l:MFA.function = l:function
+		if l:module != expand('%:t:r')
 			" To other module function call
-			let l:type = a:globaldefine
+			let l:MFA.module = l:module
 		endif
 	elseif match(l:MF, '\v^' . l:atom . '$') == 0
 		" local function call
-		let l:type = 0
-		let function = l:MF
+		let l:MFA.function = l:MF
+	elseif
+		return {}
 	end
-	call s:Open(l:type, l:module, l:function)
+
+	return l:MFA
+endfunction
+
+function! revim#goto#Define(globaldefine)
+	if a:globaldefine > 2 || a:globaldefine < 0
+		return
+	endif
+
+	let l:MFA = s:MFA()
+
+	if l:MFA == {}
+		return
+	elseif has_key(l:MFA, 'module')
+		" to other module function call
+		call s:Open(a:globaldefine, l:MFA)
+	else
+		" local function call
+		normal! gg
+		call s:Find(l:MFA)
+	endif
 endfunction
