@@ -76,7 +76,7 @@ syn region erlangSpecAttribute
 syn region erlangRecordAttribute
 	\ matchgroup=erlangAttribute
 	\ start="\v^-record"hs=s+1 end="\v\."he=e-1
-	\ contains=erlangSpecDelimiter,erlangAtom,erlangString,erlangNumber,erlangType,erlangInComment,erlangOperator
+	\ contains=erlangMacro,erlangSpecDelimiter,erlangAtom,erlangString,erlangNumber,erlangType,erlangInComment,erlangOperator
 syn region erlangTypeAttribute
 	\ matchgroup = erlangAttribute
 	\ start="\v^-(type|opaque)"hs=s+1  end="\v\."he=e-1
