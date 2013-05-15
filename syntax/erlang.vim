@@ -61,7 +61,7 @@ syn region erlangModuleAttribute
 syn region erlangExportAttribute
 	\ matchgroup=erlangAttribute
 	\ start="\v^-export(_type)?"hs=s+1 end="\v\."he=e-1
-	\ contains=erlangFunctionName
+	\ contains=erlangFunctionName,erlangInComment
 syn region erlangImportAttribute
 	\ matchgroup=erlangAttribute
 	\ start="\v^-import(_type)?"hs=s+1 end="\v\."he=e-1

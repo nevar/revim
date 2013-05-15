@@ -13,6 +13,16 @@
 -export([test/1, test/2, test/4]).
 -export([test, test / 4]).
 
+-export([
+    init/3,
+    allowed_methods/2,
+    content_types_accepted/2,
+    content_types_provided/2,
+    handle_post_json/2,
+    %handle_get_json/2,
+    resource_exists/2
+]).
+
 -import(lists, [c/1]).
 
 -author([a, "dsafdsa"]).
